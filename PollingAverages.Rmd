@@ -1,0 +1,46 @@
+---
+title: "Georgia Polling Averages"
+output:
+  pdf_document: default
+  html_document: default
+---
+I collected the results of eleven opinion polls conducted in Georgia between June and October 2008. Where possible, I've also added basic metadata, however, due to the lack of transparency, not all information is included in the public statements circulated in the media.
+
+Calculations below are simple weighted averages of vote shares weighted by the number of days between the end of the fieldwork and election day. In case of election day 1 is assigned as weight. Overall, closer the poll was conducted to the election day, more it influences the model.
+
+```{r}
+library(ggplot2)
+library(dtplyr)
+
+poll_csv<-read.csv("raw/polls_2016.csv")
+
+
+### Calculate vote share for only decided voters 
+poll_csv$decided<-1-poll_csv$Undecided
+
+poll_csv$Georgian_dream<-poll_csv$Georgian_drea/poll_csv$decided
+poll_csv$UNM<-poll_csv$UNM/poll_csv$decided
+poll_csv$Labor<-poll_csv$Labor/poll_csv$decided
+poll_csv$Free_democrats<-poll_csv$Free_democrats/poll_csv$decided
+poll_csv$State_for_the_people<-poll_csv$State_for_the_people/poll_csv$decided
+poll_csv$Alliance_of_patriots<-poll_csv$Alliance_of_patriots/poll_csv$decided
+poll_csv$United_democratic_movement<-poll_csv$United_democratic_movement/poll_csv$decided
+poll_csv$Other<-poll_csv$Other/poll_csv$decided
+
+wt <- 1/poll_csv$Days_to_elections
+
+gd<-weighted.mean(poll_csv$Georgian_drea, wt)
+unm<-weighted.mean(poll_csv$UNM, wt)
+lab<-weighted.mean(poll_csv$Labor, wt)
+fd<-weighted.mean(poll_csv$Free_democrats, wt)
+sps<-weighted.mean(poll_csv$State_for_the_people, wt)
+apa<-weighted.mean(poll_csv$Alliance_of_patriots, wt)
+udm<-weighted.mean(poll_csv$United_democratic_movement, wt)
+oth<-weighted.mean(poll_csv$Other, wt)
+
+names<-c("gd", "unm", "lab", "fd", "sps", "apa", "udm", "oth")
+wgta<-rbind(gd, unm, lab, fd, sps, apa, udm, oth)
+predictions<-as.data.frame(cbind(names, wgta))
+
+
+```
